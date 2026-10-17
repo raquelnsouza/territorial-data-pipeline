@@ -1,0 +1,15 @@
+# SITE_ADDRESS=demo.seudominio.com.br  → HTTPS automático (Let's Encrypt)
+# SITE_ADDRESS=:80                     → HTTP simples (teste/IP)
+{$SITE_ADDRESS::80} {
+	encode gzip
+
+	redir /relatorio /relatorio/ permanent
+	handle_path /relatorio/* {
+		root * /srv/reports
+		file_server
+	}
+
+	handle {
+		reverse_proxy airflow-webserver:8080
+	}
+}

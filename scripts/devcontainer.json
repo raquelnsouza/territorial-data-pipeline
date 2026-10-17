@@ -1,0 +1,13 @@
+{
+  "name": "territorial-data-pipeline",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": { "label": "Airflow", "onAutoForward": "notify" }
+  },
+  "postCreateCommand": "bash scripts/codespaces.sh"
+}
