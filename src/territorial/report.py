@@ -65,7 +65,7 @@ def renderizar(mun: gpd.GeoDataFrame, cob: pd.DataFrame, ultimas: pd.DataFrame, 
 <h2>Formação florestal por município{f" — {ano}" if ano else ""} (% da área)</h2>
 <div id="mapa"></div>
 <h2>Validações da última execução</h2><div class="box">{_tabela(validacoes)}</div>
-<h2>Histórico de atualizações (rastreabilidade)</h2><div class="box">{_tabela(ultimas)}</div>
+<h2>Histórico de atualizações</h2><div class="box">{_tabela(ultimas)}</div>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
