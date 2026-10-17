@@ -66,7 +66,8 @@ def _primeira_coluna(df: pd.DataFrame, candidatas: tuple[str, ...], rotulo: str)
 
 
 def _colunas_de_ano(df: pd.DataFrame) -> list:
-    return [c for c in df.columns if re.fullmatch(r"\d{4}", str(c).strip())]
+    """Colunas de ano: '1985', 'y1985', 'ano_1985'... (o MapBiomas já usou mais de um padrão)."""
+    return [c for c in df.columns if re.fullmatch(r"(?:y|ano_?|year_?)?\d{4}", str(c).strip(), flags=re.I)]
 
 
 def escolher_aba(abas: list[str], preferida: str | None = None) -> str:
@@ -75,6 +76,8 @@ def escolher_aba(abas: list[str], preferida: str | None = None) -> str:
     if preferida in abas:
         return preferida
     candidatas = [a for a in abas if str(a).upper().startswith("COVERAGE")]
+    # a coleção mais nova (maior número no fim do nome) vem primeiro: COVERAGE_11 antes de COVERAGE_10
+    candidatas.sort(key=lambda a: int((re.findall(r"\d+", str(a)) or ["0"])[-1]), reverse=True)
     if candidatas:
         log.warning("Aba %r não existe; usando %r", preferida, candidatas[0])
         return candidatas[0]
@@ -175,7 +178,7 @@ def mapbiomas_para_longo(bruto: pd.DataFrame, uf: str) -> pd.DataFrame:
     longo = longo.rename(columns={col_classe: "classe_id", **({col_nome: "classe_nome"} if col_nome else {})})
     if "classe_nome" not in longo.columns:
         longo["classe_nome"] = None
-    longo["ano"] = longo["ano"].astype(str).str.strip().astype(int)
+    longo["ano"] = longo["ano"].astype(str).str.extract(r"(\d{4})", expand=False).astype(int)
     longo["classe_id"] = pd.to_numeric(longo["classe_id"], errors="coerce")
     longo["area_ha"] = pd.to_numeric(longo["area_ha"], errors="coerce")
 

@@ -56,7 +56,7 @@ ESTADOS = {
 # Airflow (MAPBIOMAS_URL) ou da variável de ambiente.
 MAPBIOMAS_URL_ENV = "MAPBIOMAS_URL"
 MAPBIOMAS_ARQUIVO_LOCAL_ENV = "MAPBIOMAS_ARQUIVO_LOCAL"  # alternativa: arquivo já baixado
-MAPBIOMAS_ABA = os.environ.get("MAPBIOMAS_ABA", "COVERAGE_10")
+MAPBIOMAS_ABA = os.environ.get("MAPBIOMAS_ABA", "COVERAGE_11")
 
 # Nomes de coluna aceitos (a ordem é a prioridade). Se a coleção mudar o nome, basta
 # acrescentar aqui.

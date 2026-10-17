@@ -25,7 +25,7 @@ x-airflow-common: &airflow-common
     # Fonte do MapBiomas (veja docs/MAPBIOMAS_FONTE.md)
     AIRFLOW_VAR_MAPBIOMAS_URL: ${MAPBIOMAS_URL:-}
     AIRFLOW_VAR_MAPBIOMAS_ARQUIVO_LOCAL: ${MAPBIOMAS_ARQUIVO_LOCAL:-}
-    MAPBIOMAS_ABA: ${MAPBIOMAS_ABA:-COVERAGE_10}
+    MAPBIOMAS_ABA: ${MAPBIOMAS_ABA:-COVERAGE_11}
     # Alertas por e-mail (opcional)
     ALERT_EMAIL: ${ALERT_EMAIL:-}
     AIRFLOW__SMTP__SMTP_HOST: ${SMTP_HOST:-}
@@ -83,7 +83,7 @@ services:
     command:
       - -c
       - |
-        airflow db migrate &&
+        airflow db migrate || exit 1
         airflow users create --username admin --role Admin --firstname Admin --lastname Dados \
           --email admin@example.com --password "${AIRFLOW_ADMIN_PASSWORD}" || true
         airflow users create --username visitante --role Viewer --firstname Visitante --lastname Leitura \

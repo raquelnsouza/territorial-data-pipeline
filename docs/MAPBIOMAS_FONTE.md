@@ -38,7 +38,7 @@ mesmo quando a cópia do arquivo é apagada.
 ## O que o pipeline espera dentro do arquivo
 | Item | Esperado | Onde mudar se a coleção mudar |
 |---|---|---|
-| Aba | `COVERAGE_10` (ou a 1ª aba que começa com `COVERAGE`) | `MAPBIOMAS_ABA` |
+| Aba | `COVERAGE_11` (ou a 1ª aba que começa com `COVERAGE`) | `MAPBIOMAS_ABA` |
 | Código do município | coluna `geocode` (aceita também `cd_mun`, `cod_municipio`) | `config.py` |
 | Classe | coluna `class_id` | `config.py` |
 | Anos | colunas com nome de 4 dígitos (`1985` … `2024`) | automático |
