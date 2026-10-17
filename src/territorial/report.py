@@ -70,7 +70,7 @@ def renderizar(mun: gpd.GeoDataFrame, cob: pd.DataFrame, ultimas: pd.DataFrame, 
  th{{background:#eef2ea}} .box{{overflow-x:auto}} h2{{font-size:1.05rem;margin-top:28px}}
 </style></head><body>
 <header><h1>Atualização automatizada de bases territoriais ({html.escape(uf)})</h1>
-<p>Demonstração técnica — IBGE (malha municipal) + MapBiomas (cobertura do solo). Gerado em {agora}.</p></header>
+<p>Demonstração técnica — IBGE (malha municipal) + MapBiomas (cobertura do solo). Atualizado em {agora}.</p></header>
 <main>
 <h2>Formação florestal por município{f" — {ano}" if ano else ""} (% da área)</h2>
 <div id="mapa"></div>
