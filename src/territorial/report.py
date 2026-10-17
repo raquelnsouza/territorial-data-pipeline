@@ -71,7 +71,7 @@ def renderizar(mun: gpd.GeoDataFrame, cob: pd.DataFrame, ultimas: pd.DataFrame, 
 <script>
 const dados = {json.dumps(geojson)};
 const mapa = L.map('mapa'); 
-L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{attribution:'© OpenStreetMap'}}).addTo(mapa);
+L.tileLayer('https://{{s}}.basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}{{r}}.png',{{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19}}).addTo(mapa);
 const cor = v => v==null ? '#cccccc' : v>90 ? '#14532d' : v>75 ? '#2f855a' : v>50 ? '#68b684' : v>25 ? '#b7dfb9' : '#f1f7e4';
 const camada = L.geoJSON(dados, {{
   style: f => ({{fillColor: cor(f.properties.pct_classe), weight: .6, color: '#555', fillOpacity: .85}}),
