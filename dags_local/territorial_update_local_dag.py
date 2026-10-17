@@ -1,10 +1,4 @@
-"""DAG (versão SEM BANCO): mesma lógica do DAG principal, gravando em arquivos.
-
-Para rodar o Airflow sem Docker e sem PostGIS (ex.: WSL com `airflow standalone`).
-Saídas em $TERRITORIAL_SAIDA (padrão ~/territorial_saida):
-    territorial_<UF>.gpkg · audit/*.jsonl · relatorio/index.html · raw/
-
-Fluxo:
+"""Fluxo:
     extrair_ibge ─┐
                   ├─► detectar_mudanca ─► transformar_e_validar ─► gravar ─► publicar_relatorio
     extrair_mapbiomas ┘
