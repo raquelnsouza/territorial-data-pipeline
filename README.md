@@ -23,6 +23,8 @@ Executado com dados reais: 144 municípios do Pará, 80 mil linhas de cobertura 
 Só reprocessa quando a fonte muda (comparação de checksum), então rodar toda semana não custa nada
 quando não há novidade.
 
+![Execução da DAG no Airflow](docs/airflow-dag.png)
+
 ## O que o projeto cobre
 
 | Tema | Onde está |
