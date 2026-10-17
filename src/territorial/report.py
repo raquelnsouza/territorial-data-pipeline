@@ -18,12 +18,20 @@ from . import config
 from .transform import resumo_por_municipio
 
 
+def _celula(v) -> str:
+    if v is None or (not isinstance(v, str) and pd.isna(v)):
+        return ""
+    if isinstance(v, float) and v.is_integer():
+        return str(int(v))
+    return str(v)
+
+
 def _tabela(df: pd.DataFrame) -> str:
     if df is None or df.empty:
         return "<p>Sem registros.</p>"
     cab = "".join(f"<th>{html.escape(str(c))}</th>" for c in df.columns)
     linhas = "".join(
-        "<tr>" + "".join(f"<td>{html.escape('' if pd.isna(v) else str(v))}</td>" for v in row) + "</tr>"
+        "<tr>" + "".join(f"<td>{html.escape(_celula(v))}</td>" for v in row) + "</tr>"
         for row in df.itertuples(index=False)
     )
     return f"<table><thead><tr>{cab}</tr></thead><tbody>{linhas}</tbody></table>"
@@ -54,7 +62,9 @@ def renderizar(mun: gpd.GeoDataFrame, cob: pd.DataFrame, ultimas: pd.DataFrame, 
  header{{background:#14532d;color:#fff;padding:20px 5vw}} h1{{margin:0;font-size:1.3rem}}
  header p{{margin:.3rem 0 0;opacity:.85;font-size:.9rem}}
  main{{padding:16px 5vw 40px;max-width:1200px;margin:auto}}
- #mapa{{height:460px;border-radius:8px;border:1px solid #d5dbd0}}
+ #mapa{{height:460px;border-radius:8px;border:1px solid #d5dbd0;background:#eef3f0}}
+ .legenda{{background:#fff;padding:8px 10px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.25);font-size:.78rem;line-height:1.5}}
+ .legenda b{{display:block;margin-bottom:4px}} .legenda i{{display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:-2px;border:1px solid #888}}
  table{{border-collapse:collapse;width:100%;font-size:.85rem;background:#fff}}
  th,td{{border:1px solid #e1e5dc;padding:6px 8px;text-align:left;vertical-align:top}}
  th{{background:#eef2ea}} .box{{overflow-x:auto}} h2{{font-size:1.05rem;margin-top:28px}}
@@ -70,14 +80,21 @@ def renderizar(mun: gpd.GeoDataFrame, cob: pd.DataFrame, ultimas: pd.DataFrame, 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const dados = {json.dumps(geojson)};
-const mapa = L.map('mapa'); 
-L.tileLayer('https://{{s}}.basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}{{r}}.png',{{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19}}).addTo(mapa);
+const mapa = L.map('mapa', {{attributionControl: false}});
 const cor = v => v==null ? '#cccccc' : v>90 ? '#14532d' : v>75 ? '#2f855a' : v>50 ? '#68b684' : v>25 ? '#b7dfb9' : '#f1f7e4';
 const camada = L.geoJSON(dados, {{
   style: f => ({{fillColor: cor(f.properties.pct_classe), weight: .6, color: '#555', fillOpacity: .85}}),
   onEachFeature: (f, l) => l.bindTooltip(f.properties.nm_mun + ': ' + (f.properties.pct_classe ?? 'sem dado') + '%')
 }}).addTo(mapa);
 mapa.fitBounds(camada.getBounds());
+const faixas = [['#14532d','acima de 90%'],['#2f855a','75% a 90%'],['#68b684','50% a 75%'],['#b7dfb9','25% a 50%'],['#f1f7e4','até 25%'],['#cccccc','sem dado']];
+const legenda = L.control({{position: 'bottomright'}});
+legenda.onAdd = () => {{
+  const d = L.DomUtil.create('div', 'legenda');
+  d.innerHTML = '<b>Formação florestal<br>(% da área do município)</b>' + faixas.map(f => `<i style="background:${{f[0]}}"></i>${{f[1]}}`).join('<br>');
+  return d;
+}};
+legenda.addTo(mapa);
 </script></body></html>"""
     destino.write_text(pagina, encoding="utf-8")
     return destino
