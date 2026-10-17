@@ -27,7 +27,7 @@ quando não há novidade.
 
 | Tema | Onde está |
 |---|---|
-| Fontes, formatos e acesso (APIs do IBGE, planilha do MapBiomas no Drive) | `src/territorial/config.py`, `docs/MAPBIOMAS_FONTE.md` |
+| Fontes, formatos e acesso (APIs do IBGE, planilha do MapBiomas no Drive) | `src/territorial/config.py` |
 | **Qualidade dos dados**: projeção, geometrias, códigos, consistência entre as bases | `src/territorial/validate.py` |
 | **Histórico de execuções**: o que foi baixado, validado e gravado, com SHA-256 do arquivo | tabelas `audit.*` / `audit/*.jsonl`; arquivo bruto preservado |
 | **Atualização incremental**: agendamento semanal, só processa se a fonte mudou | `schedule="@weekly"` + checagem de checksum |
@@ -47,38 +47,9 @@ O mesmo código roda de duas formas:
 * **Airflow + PostGIS** (`dags/`): grava num banco geográfico com carga transacional (staging → troca), para
   uso com QGIS ou Power BI. Coberto por testes de integração com PostGIS real.
 
-### Airflow sem Docker (Linux, WSL ou GitHub Codespaces)
-
-Requer Python 3.12.
-
-```bash
-uv venv --python 3.12 ~/af && source ~/af/bin/activate
-uv pip install "apache-airflow==2.10.5" geopandas pyogrio openpyxl requests \
-  --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.12.txt
-bash scripts/airflow_wsl.sh      # Airflow em http://localhost:8080; senha do admin no terminal
-```
-
-No Airflow, ative e dispare a DAG **`territorial_update_local`**. Resultados em `~/territorial_saida`.
-
-### Airflow + PostGIS com Docker
-
-```bash
-cp .env.example .env          # edite as senhas
-# preencha MAPBIOMAS_URL com o link do Google Drive (docs/MAPBIOMAS_FONTE.md)
-docker compose up -d --build
-```
-
-* Airflow: http://localhost:8080 (usuário `admin`, senha do `.env`)
-* Banco: `localhost:5433`, usuário `territorial`
-
-Dispare a DAG **`territorial_update`**. Dois parâmetros ajudam a demonstrar o comportamento:
-`forcar_falha_validacao` (simula uma falha, para mostrar alerta e histórico) e `ignorar_checksum`
-(reprocessa mesmo sem mudança na fonte).
-
 ### Só Python no Windows
 
 `scripts/rodar_local.ps1` roda o fluxo completo sem Airflow, com a saída em GeoPackage e relatório.
-Detalhes em `docs/RODAR_SEM_DOCKER.md`.
 
 ## Estrutura
 
@@ -90,7 +61,7 @@ src/territorial/                           a lógica (testável sem Airflow)
 sql/init.sql                               tabelas, visão e auditoria
 tests/                                     pytest + integração com PostGIS + ponta a ponta
 scripts/                                   Airflow sem Docker, servidor, Windows, Codespaces
-docs/                                      documentação e o relatório publicado (index.html)
+docs/                                      relatório publicado (GitHub Pages)
 docker-compose.yml Dockerfile Caddyfile    Airflow + PostGIS + HTTPS
 ```
 
@@ -102,12 +73,3 @@ docker-compose.yml Dockerfile Caddyfile    Airflow + PostGIS + HTTPS
 * **Fonte bruta preservada.** Todo arquivo baixado fica guardado com checksum, com retenção das últimas versões.
 * **Falhas visíveis.** Cada falha entra no histórico com a causa; o dado anterior não é sobrescrito.
 * **Nova base = um extrator + um conjunto de regras**, sem mexer no resto.
-
-## Limites
-
-* Recorte em um estado (PA), com malha simplificada do IBGE (`qualidade=minima`). Para uso em produção:
-  malha em qualidade máxima, mais bases e monitoramento contínuo.
-* O modo com PostGIS e Docker foi coberto por testes de integração, mas a execução completa com dados reais
-  foi feita no modo em arquivos.
-* O relatório publicado é um retrato da última execução, não uma página que se atualiza sozinha.
-* Dados de origem: IBGE e MapBiomas. Confira as condições de uso e cite as fontes ao divulgar.
