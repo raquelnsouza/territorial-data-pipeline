@@ -87,6 +87,34 @@ def _nome_de_coluna(v) -> str | int:
     return str(v).strip() if v is not None else ""
 
 
+def _abrir_xlsx(arquivo: Path) -> Path:
+    """Devolve o caminho de um .xlsx de verdade (o Drive pode entregar a planilha dentro de um .zip)."""
+    import zipfile
+
+    if not zipfile.is_zipfile(arquivo):
+        return arquivo
+    with zipfile.ZipFile(arquivo) as z:
+        nomes = z.namelist()
+        if "[Content_Types].xml" in nomes:
+            return arquivo  # já é um .xlsx
+        internos = [n for n in nomes if n.lower().endswith((".xlsx", ".xlsm")) and not n.endswith("/")]
+        if not internos:
+            raise ErroDeFormato(
+                "O arquivo do MapBiomas é um zip sem nenhuma planilha .xlsx dentro "
+                f"(conteúdo: {', '.join(nomes[:5])})."
+            )
+        interno = max(internos, key=lambda n: z.getinfo(n).file_size)
+        destino_dir = arquivo.parent / "descompactado"
+        destino_dir.mkdir(parents=True, exist_ok=True)
+        destino = destino_dir / Path(interno).name
+        if not destino.exists() or destino.stat().st_size != z.getinfo(interno).file_size:
+            log.info("MapBiomas: descompactando %s", interno)
+            with z.open(interno) as src, open(destino, "wb") as dst:
+                while bloco := src.read(1024 * 1024):
+                    dst.write(bloco)
+        return destino
+
+
 def ler_mapbiomas(arquivo_xlsx: Path, uf: str, aba: str | None = None) -> pd.DataFrame:
     """Lê a tabela larga do MapBiomas e devolve o formato longo para a UF pedida.
 
@@ -97,7 +125,7 @@ def ler_mapbiomas(arquivo_xlsx: Path, uf: str, aba: str | None = None) -> pd.Dat
     from openpyxl import load_workbook
 
     prefixo = config.ESTADOS[uf].codigo_ibge
-    wb = load_workbook(arquivo_xlsx, read_only=True, data_only=True)
+    wb = load_workbook(_abrir_xlsx(Path(arquivo_xlsx)), read_only=True, data_only=True)
     try:
         ws = wb[escolher_aba(wb.sheetnames, aba)]
         linhas = ws.iter_rows(values_only=True)
